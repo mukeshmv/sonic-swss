@@ -5210,6 +5210,10 @@ void PortsOrch::doVlanTask(Consumer &consumer)
             uint32_t mtu = 0;
             MacAddress mac;
             string hostif_name = "";
+            bool learn_disable = false;
+            string unknown_unicast_flood_control_type = "";
+            string unknown_multicast_flood_control_type = "";
+            string unknown_broadcast_flood_control_type = "";
             for (auto i : kfvFieldsValues(t))
             {
                 if (fvField(i) == "mtu")
@@ -5224,6 +5228,25 @@ void PortsOrch::doVlanTask(Consumer &consumer)
                 {
                     hostif_name = fvValue(i);
                 }
+                if (fvField(i) == "learn_disable")
+                {
+                    if (fvValue(i) == "true")
+                    {
+                        learn_disable = true;
+                    }
+                }
+                if (fvField(i) == "unknown_unicast_flood_control_type")
+                {
+                    unknown_unicast_flood_control_type = fvValue(i);
+                }
+                if (fvField(i) == "unknown_multicast_flood_control_type")
+                {
+                    unknown_multicast_flood_control_type = fvValue(i);
+                }
+                if (fvField(i) == "unknown_broadcast_flood_control_type")
+                {
+                    unknown_broadcast_flood_control_type = fvValue(i);
+                }
             }
 
             /*
@@ -5233,7 +5256,7 @@ void PortsOrch::doVlanTask(Consumer &consumer)
              */
             if (m_portList.find(vlan_alias) == m_portList.end())
             {
-                if (!addVlan(vlan_alias))
+                if (!addVlan(vlan_alias, learn_disable, unknown_unicast_flood_control_type, unknown_multicast_flood_control_type, unknown_broadcast_flood_control_type))
                 {
                     it++;
                     continue;
@@ -6604,7 +6627,7 @@ bool PortsOrch::setBridgePortLearnMode(Port &port, sai_bridge_port_fdb_learning_
     return true;
 }
 
-bool PortsOrch::addVlan(string vlan_alias)
+bool PortsOrch::addVlan(string vlan_alias, bool learn_disable, string unknown_unicast_flood_control_type, string unknown_multicast_flood_control_type, string unknown_broadcast_flood_control_type)
 {
     SWSS_LOG_ENTER();
 
@@ -6612,10 +6635,40 @@ bool PortsOrch::addVlan(string vlan_alias)
 
     sai_vlan_id_t vlan_id = (uint16_t)stoi(vlan_alias.substr(4));
     sai_attribute_t attr;
+    vector<sai_attribute_t> attrs;
     attr.id = SAI_VLAN_ATTR_VLAN_ID;
     attr.value.u16 = vlan_id;
+    attrs.push_back(attr);
+    attr.id = SAI_VLAN_ATTR_LEARN_DISABLE;
+    attr.value.booldata = learn_disable;
+    attrs.push_back(attr);
+    if (unknown_unicast_flood_control_type == "FLOOD_CONTROL_TYPE_NONE") {
+        if (uuc_sup_flood_control_type.find(SAI_VLAN_FLOOD_CONTROL_TYPE_NONE)
+            == uuc_sup_flood_control_type.end()) {
+            SWSS_LOG_ERROR("Unicast flood control type not supported");
+            return false;
+        }
+        attr.id = SAI_VLAN_ATTR_UNKNOWN_UNICAST_FLOOD_CONTROL_TYPE;
+        attr.value.s32 = SAI_VLAN_FLOOD_CONTROL_TYPE_NONE;
+        attrs.push_back(attr);
+    }
+    if (unknown_multicast_flood_control_type == "FLOOD_CONTROL_TYPE_NONE") {
+        attr.id = SAI_VLAN_ATTR_UNKNOWN_MULTICAST_FLOOD_CONTROL_TYPE;
+        attr.value.s32 = SAI_VLAN_FLOOD_CONTROL_TYPE_NONE;
+        attrs.push_back(attr);
+    }
+    if (unknown_broadcast_flood_control_type == "FLOOD_CONTROL_TYPE_NONE") {
+        if (bc_sup_flood_control_type.find(SAI_VLAN_FLOOD_CONTROL_TYPE_NONE)
+            == bc_sup_flood_control_type.end()) {
+            SWSS_LOG_ERROR("Broadcast flood control type not supported");
+            return false;
+        }
+        attr.id = SAI_VLAN_ATTR_BROADCAST_FLOOD_CONTROL_TYPE;
+        attr.value.s32 = SAI_VLAN_FLOOD_CONTROL_TYPE_NONE;
+        attrs.push_back(attr);
+    }
 
-    sai_status_t status = sai_vlan_api->create_vlan(&vlan_oid, gSwitchId, 1, &attr);
+    sai_status_t status = sai_vlan_api->create_vlan(&vlan_oid, gSwitchId, static_cast<uint32_t>(attrs.size()), attrs.data());
 
     if (status != SAI_STATUS_SUCCESS)
     {
@@ -6632,8 +6685,17 @@ bool PortsOrch::addVlan(string vlan_alias)
     Port vlan(vlan_alias, Port::VLAN);
     vlan.m_vlan_info.vlan_oid = vlan_oid;
     vlan.m_vlan_info.vlan_id = vlan_id;
-    vlan.m_vlan_info.uuc_flood_type = SAI_VLAN_FLOOD_CONTROL_TYPE_ALL;
-    vlan.m_vlan_info.bc_flood_type = SAI_VLAN_FLOOD_CONTROL_TYPE_ALL;
+    if (unknown_unicast_flood_control_type == "FLOOD_CONTROL_TYPE_NONE") {
+        vlan.m_vlan_info.uuc_flood_type = SAI_VLAN_FLOOD_CONTROL_TYPE_NONE;
+    } else {
+        vlan.m_vlan_info.uuc_flood_type = SAI_VLAN_FLOOD_CONTROL_TYPE_ALL;
+    }
+    if (unknown_broadcast_flood_control_type == "FLOOD_CONTROL_TYPE_NONE") {
+        vlan.m_vlan_info.bc_flood_type = SAI_VLAN_FLOOD_CONTROL_TYPE_NONE;
+    } else {
+        vlan.m_vlan_info.bc_flood_type = SAI_VLAN_FLOOD_CONTROL_TYPE_ALL;
+    }
+
     vlan.m_members = set<string>();
     m_portList[vlan_alias] = vlan;
     m_port_ref_count[vlan_alias] = 0;

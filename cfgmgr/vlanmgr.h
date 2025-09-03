@@ -21,7 +21,7 @@ public:
 private:
     ProducerStateTable m_appVlanTableProducer, m_appVlanMemberTableProducer;
     ProducerStateTable m_appFdbTableProducer, m_appPortTableProducer;
-    Table m_cfgVlanTable, m_cfgVlanMemberTable;
+    Table m_cfgVlanTable, m_cfgVlanMemberTable, m_cfgFdbTable;
     Table m_statePortTable, m_stateLagTable;
     Table m_stateVlanTable, m_stateVlanMemberTable;
     std::set<std::string> m_vlans;

@@ -400,7 +400,7 @@ private:
 
     bool setBridgePortLearnMode(Port &port, sai_bridge_port_fdb_learning_mode_t learn_mode);
 
-    bool addVlan(string vlan);
+    bool addVlan(string vlan, bool learn_disable, string unknown_unicast_flood_control_type, string unknown_multicast_flood_control_type, string unknown_broadcast_flood_control_type);
     bool removeVlan(Port vlan);
 
     bool addLag(string lag, uint32_t spa_id, int32_t switch_id);

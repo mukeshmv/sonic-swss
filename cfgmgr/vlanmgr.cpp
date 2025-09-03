@@ -26,6 +26,7 @@ VlanMgr::VlanMgr(DBConnector *cfgDb, DBConnector *appDb, DBConnector *stateDb, c
         Orch(cfgDb, stateDb, tableNames, stateTableNames),
         m_cfgVlanTable(cfgDb, CFG_VLAN_TABLE_NAME),
         m_cfgVlanMemberTable(cfgDb, CFG_VLAN_MEMBER_TABLE_NAME),
+        m_cfgFdbTable(cfgDb, CFG_FDB_TABLE_NAME),
         m_statePortTable(stateDb, STATE_PORT_TABLE_NAME),
         m_stateLagTable(stateDb, STATE_LAG_TABLE_NAME),
         m_stateVlanTable(stateDb, STATE_VLAN_TABLE_NAME),
@@ -357,6 +358,10 @@ void VlanMgr::doVlanTask(Consumer &consumer)
             string mtu = DEFAULT_MTU_STR;
             string mac = gMacAddress.to_string();
             string hostif_name = "";
+            string learn_disable = "";
+            string unknown_unicast_flood_control_type = "";
+            string unknown_multicast_flood_control_type = "";
+            string unknown_broadcast_flood_control_type = "";
             vector<FieldValueTuple> fvVector;
             string members;
 
@@ -417,6 +422,22 @@ void VlanMgr::doVlanTask(Consumer &consumer)
                 {
                     hostif_name = fvValue(i);
                 }
+                else if (fvField(i) == "learn_disable")
+                {
+                    learn_disable = fvValue(i);
+                }
+                else if (fvField(i) == "unknown_unicast_flood_control_type")
+                {
+                    unknown_unicast_flood_control_type = fvValue(i);
+                }
+                else if (fvField(i) == "unknown_multicast_flood_control_type")
+                {
+                    unknown_multicast_flood_control_type = fvValue(i);
+                }
+                else if (fvField(i) == "unknown_broadcast_flood_control_type")
+                {
+                    unknown_broadcast_flood_control_type = fvValue(i);
+                }
             }
             /* fvVector should not be empty */
             if (fvVector.empty())
@@ -433,6 +454,18 @@ void VlanMgr::doVlanTask(Consumer &consumer)
 
             FieldValueTuple hostif_name_fvt("host_ifname", hostif_name);
             fvVector.push_back(hostif_name_fvt);
+
+            FieldValueTuple learn("learn_disable", learn_disable);
+            fvVector.push_back(learn);
+
+            FieldValueTuple uufct("unknown_unicast_flood_control_type", unknown_unicast_flood_control_type);
+            fvVector.push_back(uufct);
+
+            FieldValueTuple umfct("unknown_multicast_flood_control_type", unknown_multicast_flood_control_type);
+            fvVector.push_back(umfct);
+
+            FieldValueTuple ubfct("unknown_broadcast_flood_control_type", unknown_broadcast_flood_control_type);
+            fvVector.push_back(ubfct);
 
             m_appVlanTableProducer.set(key, fvVector);
             m_vlans.insert(key);
@@ -987,6 +1020,10 @@ void VlanMgr::doTask(Consumer &consumer)
     else if (table_name == CFG_VLAN_MEMBER_TABLE_NAME)
     {
         doVlanMemberTask(consumer);
+    }
+    else if (table_name == CFG_FDB_TABLE_NAME)
+    {
+        doVlanPacFdbTask(consumer);
     }
     else if (table_name == STATE_OPER_PORT_TABLE_NAME)
     {
