@@ -11,7 +11,7 @@
 using namespace std;
 using namespace swss;
 
-#define OVERLAY_RIF_DEFAULT_MTU 9100
+#define OVERLAY_RIF_DEFAULT_MTU 9412
 #define APPEND_IF_NOT_EMPTY(vec, obj, attr) \
     if (!obj.attr.empty())                  \
     vec.push_back({#attr, obj.attr})        \

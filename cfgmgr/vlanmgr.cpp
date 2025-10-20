@@ -16,7 +16,7 @@ using namespace swss;
 #define VLAN_PREFIX         "Vlan"
 #define LAG_PREFIX          "PortChannel"
 #define DEFAULT_VLAN_ID     "1"
-#define DEFAULT_MTU_STR     "9100"
+#define DEFAULT_MTU_STR     "9412"
 #define VLAN_HLEN            4
 
 extern MacAddress gMacAddress;

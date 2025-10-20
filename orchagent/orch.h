@@ -43,6 +43,7 @@ const char state_db_key_delimiter  = '|';
 #define BRCM_DNX_PLATFORM_SUBSTRING "broadcom-dnx"
 #define BFN_PLATFORM_SUBSTRING  "barefoot"
 #define VS_PLATFORM_SUBSTRING   "vs"
+#define HELIOS_VS_PLATFORM_SUBSTRING   "helios-vs"
 #define NPS_PLATFORM_SUBSTRING  "nephos"
 #define CISCO_8000_PLATFORM_SUBSTRING "cisco-8000"
 #define XS_PLATFORM_SUBSTRING   "xsight"

@@ -68,7 +68,7 @@ extern event_handle_t g_events_handle;
 
 // defines ------------------------------------------------------------------------------------------------------------
 
-#define DEFAULT_SYSTEM_PORT_MTU 9100
+#define DEFAULT_SYSTEM_PORT_MTU 9412
 #define VLAN_PREFIX         "Vlan"
 #define DEFAULT_VLAN_ID     1
 #define MAX_VALID_VLAN_ID   4094
@@ -1232,6 +1232,7 @@ bool PortsOrch::removePortBulk(const std::vector<sai_object_id_t> &portList)
         // else : port is in default state or not yet created
 
         // Remove port serdes (if exists) before removing port since this reference is dependency
+        SWSS_LOG_NOTICE("*** removePortBulk: Removing port serdes object for port 0x%" PRIx64, cit);
         removePortSerdesAttribute(cit);
 
         /*
@@ -3675,6 +3676,7 @@ sai_status_t PortsOrch::removePort(sai_object_id_t port_id)
      * reference is dependency.
      */
 
+    SWSS_LOG_NOTICE("*** removePort: Removing port serdes object for port 0x%" PRIx64, port_id);
     removePortSerdesAttribute(port_id);
 
     for (auto queue_id : port.m_queue_ids)
@@ -3871,6 +3873,7 @@ void PortsOrch::deInitPort(string alias, sai_object_id_t port_id)
     m_counterTable->hdel("", alias);
 
     /* Remove the associated port serdes attribute */
+    SWSS_LOG_NOTICE("*** deInitPort: Removing port serdes object for port 0x%" PRIx64, port_id);
     removePortSerdesAttribute(p.m_port_id);
 
     /* Remove the entry from buffer maximum parameter table*/
@@ -4203,6 +4206,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
                 // Bulk port remove
                 if (!portsToRemoveList.empty())
                 {
+                    SWSS_LOG_NOTICE("*** doPortTask: Removing port serdes object");
                     if (!removePortBulk(portsToRemoveList))
                     {
                         SWSS_LOG_THROW("PortsOrch initialization failure");
@@ -5148,6 +5152,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
                 );
             }
 
+            SWSS_LOG_NOTICE("*** RemovePort Call for port 0x%" PRIx64, port_id);
             sai_status_t status = removePort(port_id);
             if (SAI_STATUS_SUCCESS != status)
             {

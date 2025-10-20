@@ -38,7 +38,7 @@ extern sai_router_interface_api_t *sai_router_intfs_api;
 
 #define UNREFERENCED_PARAMETER(P)       (P)
 
-#define UNDERLAY_RIF_DEFAULT_MTU 9100
+#define UNDERLAY_RIF_DEFAULT_MTU 9412
 
 /* Global variables */
 sai_object_id_t gVirtualRouterId;
@@ -709,9 +709,14 @@ int main(int argc, char **argv)
 
     if (gMySwitchType == "voq" || gMySwitchType == "fabric" || gMySwitchType == "chassis-packet" || gMySwitchType == "dpu" || create_switch_timeout)
     {
+        char *platform = getenv("platform");
+
         /* Set syncd response timeout back to the default value */
         attr.id = SAI_REDIS_SWITCH_ATTR_SYNC_OPERATION_RESPONSE_TIMEOUT;
         attr.value.u64 = SAI_REDIS_DEFAULT_SYNC_OPERATION_RESPONSE_TIMEOUT;
+        if (platform && strstr(platform, HELIOS_VS_PLATFORM_SUBSTRING)) {
+	    attr.value.u64 = (5 * SAI_REDIS_DEFAULT_SYNC_OPERATION_RESPONSE_TIMEOUT);
+	}
         status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
 
         if (status != SAI_STATUS_SUCCESS)

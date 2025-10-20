@@ -26,7 +26,7 @@ using namespace swss;
 #define VRF_MGMT            "mgmt"
 
 #define LOOPBACK_DEFAULT_MTU_STR "65536"
-#define DEFAULT_MTU_STR 9100
+#define DEFAULT_MTU_STR 9412
 
 IntfMgr::IntfMgr(DBConnector *cfgDb, DBConnector *appDb, DBConnector *stateDb, const vector<string> &tableNames) :
         Orch(cfgDb, tableNames),
