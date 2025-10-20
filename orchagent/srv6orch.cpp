@@ -17,7 +17,7 @@ using namespace std;
 using namespace swss;
 
 #define ADJ_DELIMITER ','
-#define OVERLAY_RIF_DEFAULT_MTU 9100
+#define OVERLAY_RIF_DEFAULT_MTU 9412
 #define LOCATOR_DEFAULT_BLOCK_LEN "32"
 #define LOCATOR_DEFAULT_NODE_LEN "16"
 #define LOCATOR_DEFAULT_FUNC_LEN "16"

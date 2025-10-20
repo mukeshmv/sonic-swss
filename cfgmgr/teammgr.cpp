@@ -802,7 +802,7 @@ task_process_status TeamMgr::addLagMember(const string &lag, const string &membe
         admin_status = it->second;
     }
 
-    // Get the LAG MTU (by default 9100)
+    // Get the LAG MTU (by default 9412)
     // Member port will inherit master's MTU attribute
     m_cfgLagTable.get(lag, fvs);
     it = find_if(fvs.begin(), fvs.end(), [](const FieldValueTuple &fv) {
@@ -845,7 +845,7 @@ bool TeamMgr::removeLagMember(const string &lag, const string &member)
     vector<FieldValueTuple> fvs;
     m_cfgPortTable.get(member, fvs);
 
-    // Re-configure port MTU and admin status (by default 9100 and up)
+    // Re-configure port MTU and admin status (by default 9412 and up)
     string admin_status = DEFAULT_ADMIN_STATUS_STR;
     string mtu = DEFAULT_MTU_STR;
     for (auto i : fvs)
