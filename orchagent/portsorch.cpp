@@ -38,6 +38,9 @@
 
 #include "saitam.h"
 
+#include <iostream>
+#include <cstdio>
+
 extern sai_switch_api_t *sai_switch_api;
 extern sai_bridge_api_t *sai_bridge_api;
 extern sai_port_api_t *sai_port_api;
@@ -4189,16 +4192,23 @@ void PortsOrch::doPortTask(Consumer &consumer)
             {
                 std::vector<PortConfig> portsToAddList;
                 std::vector<sai_object_id_t> portsToRemoveList;
+                char *platform = getenv("platform");
+                const char* filename = "/etc/sonic/.soft_switch";
+                FILE* file = fopen(filename, "r");
 
-                // Port remove comparison logic
+                // Port remove comparison logic, do only for Non-Helios-VS platform
+                // and Helios-VS platform in soft_switch mode
                 for (auto it = m_portListLaneMap.begin(); it != m_portListLaneMap.end();)
                 {
-                    if (m_lanesAliasSpeedMap.find(it->first) == m_lanesAliasSpeedMap.end())
+                    if (!(platform && strstr(platform, HELIOS_VS_PLATFORM_SUBSTRING) && file == nullptr))
                     {
-                        portsToRemoveList.push_back(it->second);
-                        it = m_portListLaneMap.erase(it);
-                        continue;
-                    }
+                        if (m_lanesAliasSpeedMap.find(it->first) == m_lanesAliasSpeedMap.end())
+                        {
+                            portsToRemoveList.push_back(it->second);
+                            it = m_portListLaneMap.erase(it);
+                            continue;
+                        }
+		    }
 
                     it++;
                 }
@@ -4206,7 +4216,6 @@ void PortsOrch::doPortTask(Consumer &consumer)
                 // Bulk port remove
                 if (!portsToRemoveList.empty())
                 {
-                    SWSS_LOG_NOTICE("*** doPortTask: Removing port serdes object");
                     if (!removePortBulk(portsToRemoveList))
                     {
                         SWSS_LOG_THROW("PortsOrch initialization failure");
