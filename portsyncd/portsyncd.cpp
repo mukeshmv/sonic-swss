@@ -171,6 +171,7 @@ int main(int argc, char **argv)
 static void notifyPortConfigDone(ProducerStateTable &p)
 {
     /* Notify that all ports added */
+    SWSS_LOG_NOTICE("PortSyncd: writing PortConfigDone for %lu ports", g_portSet.size());
     FieldValueTuple finish_notice("count", to_string(g_portSet.size()));
     vector<FieldValueTuple> attrs = { finish_notice };
     p.set("PortConfigDone", attrs);

@@ -4055,7 +4055,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
         auto key = kfvKey(keyOpFieldsValues);
         auto op = kfvOp(keyOpFieldsValues);
 
-        SWSS_LOG_INFO("KEY: %s, OP: %s", key.c_str(), op.c_str());
+        SWSS_LOG_NOTICE("KEY: %s, OP: %s", key.c_str(), op.c_str());
 
         if (key.empty())
         {
@@ -4087,7 +4087,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
 
             setPortConfigState(PORT_CONFIG_RECEIVED);
 
-            SWSS_LOG_INFO("Got PortConfigDone notification from portsyncd");
+            SWSS_LOG_NOTICE("Got PortConfigDone notification from portsyncd");
 
             it = taskMap.begin();
             continue;
@@ -4109,7 +4109,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
             {
                 addSystemPorts();
                 m_initDone = true;
-                SWSS_LOG_INFO("Got PortInitDone notification from portsyncd");
+                SWSS_LOG_NOTICE("Got PortInitDone notification from portsyncd");
             }
 
             it = taskMap.erase(it);
@@ -4190,7 +4190,10 @@ void PortsOrch::doPortTask(Consumer &consumer)
                 std::vector<PortConfig> portsToAddList;
                 std::vector<sai_object_id_t> portsToRemoveList;
 
+		SWSS_LOG_NOTICE("*** PortConfigDone - portListLaneMap size %lu lanesAliasSpeedMap %lu",
+			       	m_portListLaneMap.size(), m_lanesAliasSpeedMap.size());
                 // Port remove comparison logic
+#if 0
                 for (auto it = m_portListLaneMap.begin(); it != m_portListLaneMap.end();)
                 {
                     if (m_lanesAliasSpeedMap.find(it->first) == m_lanesAliasSpeedMap.end())
@@ -4202,11 +4205,11 @@ void PortsOrch::doPortTask(Consumer &consumer)
 
                     it++;
                 }
-
+#endif
                 // Bulk port remove
                 if (!portsToRemoveList.empty())
                 {
-                    SWSS_LOG_NOTICE("*** doPortTask: Removing port serdes object");
+		    SWSS_LOG_NOTICE("*** Bulk remove %lu ports", portsToRemoveList.size());
                     if (!removePortBulk(portsToRemoveList))
                     {
                         SWSS_LOG_THROW("PortsOrch initialization failure");
@@ -4236,6 +4239,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
                 // Bulk port add
                 if (!portsToAddList.empty())
                 {
+		    SWSS_LOG_NOTICE("*** Bulk create %lu ports", portsToAddList.size());
                     if (!addPortBulk(portsToAddList))
                     {
                         SWSS_LOG_THROW("PortsOrch initialization failure");
