@@ -455,17 +455,29 @@ void VlanMgr::doVlanTask(Consumer &consumer)
             FieldValueTuple hostif_name_fvt("host_ifname", hostif_name);
             fvVector.push_back(hostif_name_fvt);
 
-            FieldValueTuple learn("learn_disable", learn_disable);
-            fvVector.push_back(learn);
+            if (!learn_disable.empty())
+            {
+                FieldValueTuple learn("learn_disable", learn_disable);
+                fvVector.push_back(learn);
+            }
 
-            FieldValueTuple uufct("unknown_unicast_flood_control_type", unknown_unicast_flood_control_type);
-            fvVector.push_back(uufct);
+            if (!unknown_unicast_flood_control_type.empty())
+            {
+                FieldValueTuple uufct("unknown_unicast_flood_control_type", unknown_unicast_flood_control_type);
+                fvVector.push_back(uufct);
+            }
 
-            FieldValueTuple umfct("unknown_multicast_flood_control_type", unknown_multicast_flood_control_type);
-            fvVector.push_back(umfct);
+            if (!unknown_multicast_flood_control_type.empty())
+            {
+                FieldValueTuple umfct("unknown_multicast_flood_control_type", unknown_multicast_flood_control_type);
+                fvVector.push_back(umfct);
+            }
 
-            FieldValueTuple ubfct("unknown_broadcast_flood_control_type", unknown_broadcast_flood_control_type);
-            fvVector.push_back(ubfct);
+            if (!unknown_broadcast_flood_control_type.empty())
+            {
+                FieldValueTuple ubfct("unknown_broadcast_flood_control_type", unknown_broadcast_flood_control_type);
+                fvVector.push_back(ubfct);
+            }
 
             m_appVlanTableProducer.set(key, fvVector);
             m_vlans.insert(key);
