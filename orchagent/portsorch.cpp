@@ -501,7 +501,7 @@ static bool isPathTracingSupported()
         SWSS_LOG_INFO("Querying OBJECT_TYPE_LIST is not supported on this platform");
         return false;
     }
-    else 
+    else
     {
         SWSS_LOG_ERROR(
             "Failed to get a list of supported switch capabilities. Error=%d", status
@@ -4680,7 +4680,7 @@ void PortsOrch::doPortTask(Consumer &consumer)
                             );
                         }
                         m_portStateTable.hset(p.m_alias, "phy_ctrl_unreliable_los", p.m_unreliable_los ? "true":"false");
-                } 
+                }
 
                 if (pCfg.adv_interface_types.is_set)
                 {
@@ -6554,7 +6554,7 @@ bool PortsOrch::removeBridgePort(Port &port)
                 hostif_vlan_tag[SAI_HOSTIF_VLAN_TAG_STRIP], port.m_alias.c_str());
         return false;
     }
-    
+
     /* Remove STP ports before bridge port deletion*/
     gStpOrch->removeStpPorts(port);
 
@@ -6803,7 +6803,8 @@ bool PortsOrch::addVlanMember(Port &vlan, Port &port, string &tagging_mode, stri
             port.m_alias.c_str(), vlan.m_alias.c_str(), vlan.m_vlan_info.vlan_id, port.m_port_id);
 
     /* Use untagged VLAN as pvid of the member port */
-    if (sai_tagging_mode == SAI_VLAN_TAGGING_MODE_UNTAGGED &&
+    if ((sai_tagging_mode == SAI_VLAN_TAGGING_MODE_UNTAGGED ||
+         sai_tagging_mode == SAI_VLAN_TAGGING_MODE_PRIORITY_TAGGED) &&
         port.m_type != Port::TUNNEL)
     {
         if(!setPortPvid(port, vlan.m_vlan_info.vlan_id))
@@ -7139,7 +7140,8 @@ bool PortsOrch::removeVlanMember(Port &vlan, Port &port, string end_point_ip)
             port.m_alias.c_str(), vlan.m_alias.c_str(), vlan.m_vlan_info.vlan_id, vlan_member_id);
 
     /* Restore to default pvid if this port joined this VLAN in untagged mode previously */
-    if (sai_tagging_mode == SAI_VLAN_TAGGING_MODE_UNTAGGED &&
+    if ((sai_tagging_mode == SAI_VLAN_TAGGING_MODE_UNTAGGED ||
+         sai_tagging_mode == SAI_VLAN_TAGGING_MODE_PRIORITY_TAGGED) &&
         port.m_type != Port::TUNNEL)
     {
         if (!setPortPvid(port, DEFAULT_PORT_VLAN_ID))
@@ -8385,7 +8387,7 @@ void PortsOrch::generateWredPortCounterMap()
 
 /****
 *  Func Name  : addWredQueueFlexCounters
-*  Parameters : queueStateVector 
+*  Parameters : queueStateVector
 *  Returns    : void
 *  Description: Top level API to Set WRED flex counters for Queues
 **/
@@ -8455,9 +8457,9 @@ void PortsOrch::addWredQueueFlexCountersPerPort(const Port& port, FlexCounterQue
 }
 /****
 *  Func Name  : addWredQueueFlexCountersPerPortPerQueueIndex
-*  Parameters : port, queueIndex, is_voq 
+*  Parameters : port, queueIndex, is_voq
 *  Returns    : void
-*  Description: Sets the Stats list to be polled by the flexcounter 
+*  Description: Sets the Stats list to be polled by the flexcounter
 **/
 
 void PortsOrch::addWredQueueFlexCountersPerPortPerQueueIndex(const Port& port, size_t queueIndex,  bool voq, sai_queue_type_t queueType)
